@@ -2,6 +2,8 @@ Dir["./Pieces/*.rb"].each {|file| require file }
 
 class Board
 
+    attr_reader :rows
+
     def initialize
         @rows = Array.new(8) { Array.new(8, NullPiece.instance) }
     end
@@ -37,18 +39,10 @@ class Board
     end
 
     def valid_pos?(pos)
-        if pos.any? { |val| 0 >= val || val >= 7 }
+        if pos.any? { |val| 0 > val || val > 7 }
             return false
         end
         true
-    end
-
-    def display
-        (0..7).each do |row|
-            (0..7).each do |col|
-                print @rows[row][col].symbol + " "
-            end
-        end
     end
 
 end
