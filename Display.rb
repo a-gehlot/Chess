@@ -15,8 +15,11 @@ class Display
         (0..7).each do |row|
             (0..7).each do |col|
                 pos = [row,col]
+                moves = @board[@cursor.cursor_pos].moves
                 if pos == @cursor.cursor_pos
                     print @board[pos].symbol.colorize(:red) + " "
+                elsif moves.include?(pos)
+                    print @board[pos].symbol.colorize(:green) + " "
                 else print @board[pos].symbol + " "
                 end
             end
@@ -37,12 +40,9 @@ end
 a = Board.new
 b = Display.new(a)
 a.populate
-a.move_piece(:white, [6,5], [5,5])
+a.move_piece(:white, [6,5], [4,5])
 b.render
 a.move_piece(:black, [1,4], [3,4])
 b.render
 a.move_piece(:white, [6,6], [4,6])
-b.render
-a.move_piece(:black, [0,3], [4,7])
-b.render
-puts a.checkmate?(:white)
+b.render_loop

@@ -12,7 +12,7 @@ class Pawn < Piece
             start_move = [x + forward_dir * 2, y]
             moves << start_move unless !@board[start_move].is_a?(NullPiece)
         end
-        moves
+        return moves + self.side_attacks
     end
 
     def forward_dir
@@ -28,7 +28,7 @@ class Pawn < Piece
         attacks = []
         potential_moves = [[x + forward_dir, y+1], [x + forward_dir, y-1]]
         potential_moves.each do |move|
-            if @board.valid_pos?(move) && @board[pos].color != self.color
+            if @board.valid_pos?(move) && @board[move].color != nil && @board[move].color != self.color
                 attacks << move
             end
         end
