@@ -5,9 +5,12 @@ class Pawn < Piece
 
     def moves
         x, y = @pos
-        moves = [[x + forward_dir, y]]
+        moves = []
+        forward_move = [x + forward_dir, y]
+        moves << forward_move unless !@board[forward_move].is_a?(NullPiece)
         if at_start_row?
-            moves << [x + forward_dir * 2, y]
+            start_move = [x + forward_dir * 2, y]
+            moves << start_move unless !@board[start_move].is_a?(NullPiece)
         end
         moves
     end

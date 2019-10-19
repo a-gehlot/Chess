@@ -2,9 +2,9 @@ module Stepable
     def moves
         x, y = @pos
         moves = []
-        move_diffs.each do |dx, dy|
+        self.move_diffs.each do |dx, dy|
             new_pos = [x + dx, y + dy]
-            unless @board[new_pos].color == self.color || !@board.valid_pos?(new_pos)
+            unless !@board.valid_pos?(new_pos) || @board[new_pos].color == self.color 
                 moves << new_pos
             end 
         end

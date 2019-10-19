@@ -1,3 +1,4 @@
+
 module Slideable
     HORIZONTAL_DIRS = [[1,0],[0,1],[-1,0],[0,-1]]
     DIAGONAL_DIRS = [[1,1],[-1,1],[-1,-1],[1,-1]]
@@ -32,17 +33,16 @@ module Slideable
         new_move = [x + dx, y + dy]
         grown_moves = []
         while @board.valid_pos?(new_move)
-            new_move = [x + dx, y + dy]
-            unless @board[new_move].is_a?(NullPiece)
-                if @board[new_move].color == self.color
-                    break
-                else grown_moves << new_move
-                    break
-                end
+            if @board[new_move].is_a?(NullPiece)
+                grown_moves << new_move.dup
+            elsif @board[new_move].color == self.color
+                return grown_moves
+            else
+                grown_moves << new_move
+                return grown_moves
             end
-            grown_moves << new_move
-            x += dx
-            y += dy
+            new_move[0] += dx
+            new_move[1] += dy
         end
         grown_moves
     end
