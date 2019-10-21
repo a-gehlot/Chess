@@ -17,22 +17,53 @@ class Display
                 pos = [row,col]
                 moves = @board[@cursor.cursor_pos].moves
                 if pos == @cursor.cursor_pos
-                    print @board[pos].symbol.colorize(:red) + " "
+                    print @board[pos].symbol.colorize(:background => :green) + " "
                 elsif moves.include?(pos)
-                    print @board[pos].symbol.colorize(:green) + " "
-                else print @board[pos].symbol + " "
+                    print @board[pos].symbol.colorize(:cyan) + " "
+                else 
+                    print @board[pos].symbol + " "
                 end
             end
             puts
         end
     end
 
-    def render_loop
-        loop do
-            @cursor.get_input
-            system("clear")
-            self.render
+    def render_select(frozen)
+        (0..7).each do |row|
+            (0..7).each do |col|
+                pos = [row, col]
+                moves = @board[frozen].moves
+                if pos == @cursor.cursor_pos
+                    print @board[pos].symbol.colorize(:color => :magenta, :background => :green) + " "
+                elsif moves.include?(pos)
+                    print @board[pos].symbol.colorize(:blue) + " "
+                else
+                    print @board[pos].symbol + " "
+                end
+            end
+            puts
         end
+    end
+
+    def render_turn(color)
+    begin
+        a = @cursor.get_input
+        if @cursor.selected
+            system("clear")
+            self.render_select(a)
+            until !@cursor.selected
+                b = @cursor.get_input
+                system("clear")
+                self.render_select(a)
+            end
+            @board.move_piece(color, a, b)
+        end
+        system("clear")
+        self.render
+    rescue
+        puts "invalid"
+        retry
+    end
     end
 
 end
@@ -45,4 +76,4 @@ b.render
 a.move_piece(:black, [1,4], [3,4])
 b.render
 a.move_piece(:white, [6,6], [4,6])
-b.render_loop
+b.render_turn(:black)
