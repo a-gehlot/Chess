@@ -1,4 +1,4 @@
-class Pawn < Piece
+class Pawn < Piece   
     def symbol
         @color == :black ? "♟" : "♙"
     end

@@ -4,7 +4,7 @@ require_relative 'board.rb'
 
 class Display
 
-    attr_reader :cursor
+    attr_reader :cursor, :board
 
     def initialize(board)
         @board = board
@@ -47,33 +47,32 @@ class Display
 
     def render_turn(color)
     begin
+        loop do
         a = @cursor.get_input
-        if @cursor.selected
-            system("clear")
-            self.render_select(a)
-            until !@cursor.selected
-                b = @cursor.get_input
+            if @cursor.selected
                 system("clear")
+                puts "it is #{color}'s turn"
                 self.render_select(a)
+                until !@cursor.selected
+                    b = @cursor.get_input
+                    system("clear")
+                    puts "it is #{color}'s turn"
+                    self.render_select(a)
+                end
+                @board.move_piece(color, a, b)
+                system("clear")
+                puts "it is #{color}'s turn"
+                self.render
+                return
             end
-            @board.move_piece(color, a, b)
+            system("clear")
+            puts "it is #{color}'s turn"
+            self.render
+        rescue
+            puts "invalid"
+            retry
         end
-        system("clear")
-        self.render
-    rescue
-        puts "invalid"
-        retry
-    end
-    end
+        end
+        end
 
 end
-
-a = Board.new
-b = Display.new(a)
-a.populate
-a.move_piece(:white, [6,5], [4,5])
-b.render
-a.move_piece(:black, [1,4], [3,4])
-b.render
-a.move_piece(:white, [6,6], [4,6])
-b.render_turn(:black)
