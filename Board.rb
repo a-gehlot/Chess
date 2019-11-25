@@ -1,6 +1,41 @@
+Dir["./Pieces/*.rb"].each {|file| require file }
+
 class Board
+
+    attr_reader :rows
+
     def initialize
-        @rows = Array.new(8) { Array.new(8, nil) }
+        @rows = Array.new(8) { Array.new(8, NullPiece.instance) }
+    end
+
+    def populate
+        row = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
+        (0..7).each do |yc|
+            @rows[0][yc] = row[yc].new(:black, self, [0, yc])
+            @rows[1][yc] = Pawn.new(:black, self, [1,yc])
+            @rows[7][yc] = row[yc].new(:white, self, [7, yc])
+            @rows[6][yc] = Pawn.new(:white, self, [6, yc])
+        end
+    end
+
+    def move_piece!(color, start_pos, end_pos)
+        if color == self[start_pos].color && self[start_pos].moves.include?(end_pos)
+            self[start_pos].pos = end_pos
+            self[end_pos] = self[start_pos]
+            self[start_pos] = NullPiece.instance
+        else
+            raise "can't move there"
+        end
+    end
+
+    def move_piece(color, start_pos, end_pos)
+        if color == self[start_pos].color && self[start_pos].valid_moves.include?(end_pos)
+            self[start_pos].pos = end_pos
+            self[end_pos] = self[start_pos]
+            self[start_pos] = NullPiece.instance
+        else
+            raise "can't move there"
+        end
     end
 
     def [](pos)
@@ -14,145 +49,33 @@ class Board
     end
 
     def valid_pos?(pos)
-        if pos.any? { |val| 0 >= val || val >= 7 }
+        if pos.any? { |val| 0 > val || val > 7 }
             return false
         end
         true
     end
 
+    def in_check?(color)
+        king_pos = find_king(color)
+        @rows.flatten.any? { |piece| piece.color != color && piece.moves.include?(king_pos) }
+    end
+
+    def checkmate?(color)
+        self.in_check?(color) && @rows.flatten.none? { |piece| !piece.valid_moves.empty? && piece.color == color }
+    end
+
+    def find_king(color)
+        piece = @rows.flatten.find { |x| x.is_a?(King) && x.color == color }
+        return piece.pos
+    end
+
+    def dup
+        Marshal.load(Marshal.dump(self))
+    end
+
+
 end
 
-class Piece
-    def initialize(color, board, pos)
-        @color = color
-        @board = board
-        @pos = pos
-    end
-
-    def to_s
-    end
-
-    def symbol
-        symbol
-    end
-
-end
-
-module Slideable
-    HORIZONTAL_DIRS = [[1,0],[0,1],[-1,0],[0,-1]]
-    DIAGONAL_DIRS = [[1,1],[-1,1],[-1,-1],[1,-1]]
-
-    def moves 
-        moves = []
-        if horizontal_dirs
-            HORIZONTAL_DIRS.each do |dir|
-                a, b = dir
-                moves << grow_unblocked_moves_in_dir(a, b)
-            end
-        end
-        if diagonal_dirs
-            DIAGONAL_DIRS.each do |dir|
-                a, b = dir
-                moves << grow_unblocked_moves_in_dir(a, b)
-            end
-        end
-        moves.flatten(1)
-    end
-
-    def horizontal_dirs
-        move_dirs[:horizontal_dirs]
-    end
-
-    def diagonal_dirs
-        move_dirs[:diagonal_dirs]
-    end
-
-    def grow_unblocked_moves_in_dir(dx, dy)
-        x, y = @pos
-        new_move = [x + dx, y + dy]
-        grown_moves = []
-        while @board.valid_pos?(new_move)
-            new_move = [x + dx, y + dy]
-            unless @board[new_move].nil?
-                if @board[new_move].color == self.color
-                    break
-                else grown_moves << new_move
-                    break
-                end
-            end
-            grown_moves << new_move
-            x += dx
-            y += dy
-        end
-        grown_moves
-    end
-end
-
-module Stepable
-    def moves
-        x, y = @pos
-        moves = []
-        move_diffs.each do |dx, dy|
-            moves << [x + dx, y + dy]
-        end
-        moves
-    end
-end
-
-
-
-class Rook < Piece
-    include Slideable
-    def symbol
-        @color == :black ? "♜" : "♖"
-    end
-
-    def move_dirs
-        { horizontal_dirs: true, diagonal_dirs: false }
-    end
-end
-
-class Bishop < Piece
-    include Slideable
-    def symbol
-        @color == :black ? "♝" : "♗"
-    end
-
-    def move_dirs
-        { horizontal_dirs: false, diagonal_dirs: true }
-    end
-end
-
-class Queen < Piece
-    include Slideable
-    def symbol
-        @color == black ? "♛" : "♕"
-    end
-
-    def move_dirs
-        { horizontal_dirs: true, diagonal_dirs: true }
-    end
-end
-
-class King < Piece
-    def symbol
-        @color == black ? "♚" : "♔"
-    end
-
-    def move_diffs
-        [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[-1,-1],[1,-1]]
-    end
-end
-
-class Knight < Piece
-    def symbol
-        @color == black ? "♞" : "♘"
-    end
-
-    def move_diffs
-        [[2,1],[1,2],[2,-1],[1,-2],[-2,-1],[-1,-2],[-2,1],[-1,2]]
-    end
-end
 
 
 
